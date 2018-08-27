@@ -54,6 +54,11 @@ class tcp_server(threading.Thread):
             for client in client_socket:
                 client.sendall(data)
 
+    def shutdown(self):
+        self.serv.socket.close()
+        self.serv.shutdown()
+        self.serv.server_close()
+
 
 if __name__ == '__main__':
     ser = tcp_server(20000)
@@ -62,6 +67,5 @@ if __name__ == '__main__':
     time.sleep(10)
     print("sending")
     ser.send_data("test sending".encode('utf-8'))
-    time.sleep(5)
-    print("shuting")
-    ser.shutdown()
+    # print("shuting")
+    # ser.serv.shutdown()
