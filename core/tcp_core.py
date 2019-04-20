@@ -5,6 +5,7 @@ import threading
 import time
 
 client_socket = []
+shutting_flag = [False]
 
 
 class SeverHandler(BaseRequestHandler):
@@ -13,11 +14,16 @@ class SeverHandler(BaseRequestHandler):
         port = self.client_address[1]  # 获取客户端的port
         print(ip + ":" + str(port) + " is connect!")
         client_socket.append(self.request)  # 保存套接字socket
+        self.request.settimeout(1)
 
     def handle(self):
         print('Got connection from', self.client_address, end=' ')
-        while True:
-            msg = self.request.recv(8192)
+        while not shutting_flag[0]:
+            try:
+                msg = self.request.recv(8192)
+            except socket.timeout:
+                continue
+
             print("[message]", end=' ')
             print(msg)
             if not msg:
@@ -55,6 +61,7 @@ class tcp_server(threading.Thread):
                 client.sendall(data)
 
     def shutdown(self):
+        shutting_flag[0] = True
         self.serv.socket.close()
         self.serv.shutdown()
         self.serv.server_close()
@@ -67,5 +74,5 @@ if __name__ == '__main__':
     time.sleep(10)
     print("sending")
     ser.send_data("test sending".encode('utf-8'))
-    # print("shuting")
-    # ser.serv.shutdown()
+    print("shuting")
+    ser.shutdown()
